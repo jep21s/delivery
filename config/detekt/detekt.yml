@@ -1,0 +1,88 @@
+# Detekt configuration. Extends the default ruleset bundled with detekt.
+# Empty/overridden sections below relax a few rules that conflict with the
+# existing code style of the project (non-conventional root packages `libs.*`,
+# `microarch.*`, generated sources, etc.).
+
+config:
+  validation: true
+  warningsAsErrors: false
+
+complexity:
+  active: true
+  LongMethod:
+    active: true
+    threshold: 80
+  LongParameterList:
+    active: true
+    functionThreshold: 8
+    constructorThreshold: 8
+  ComplexCondition:
+    active: true
+    threshold: 6
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 15
+    thresholdInClasses: 15
+    thresholdInInterfaces: 15
+    thresholdInObjects: 15
+    thresholdInEnums: 15
+
+style:
+  active: true
+  WildcardImport:
+    active: false
+  MagicNumber:
+    active: false
+  ReturnCount:
+    active: false
+  ThrowsCount:
+    active: false
+  FunctionOnlyReturningConstant:
+    active: false
+  UtilityClassWithPublicConstructor:
+    active: false
+  UseDataClass:
+    active: false
+  MaxLineLength:
+    active: true
+    maxLineLength: 140
+    excludePackageStatements: true
+    excludeImportStatements: true
+  LoopWithTooManyJumpStatements:
+    active: false
+
+naming:
+  active: true
+  FunctionNaming:
+    active: true
+    functionPattern: '([a-z][a-zA-Z0-9]*)|(`.*`)'
+  VariableNaming:
+    active: true
+    # Разрешаем underscore-префикс для backing-полей (_domainEvents и т.п.)
+    variablePattern: '_?[a-z][A-Za-z0-9]*'
+  TopLevelPropertyNaming:
+    active: false
+  ObjectPropertyNaming:
+    active: false
+
+empty-blocks:
+  active: true
+  EmptyFunctionBlock:
+    active: false
+
+exceptions:
+  active: true
+  TooGenericExceptionCaught:
+    active: false
+  SwallowedException:
+    active: false
+
+potential-bugs:
+  active: true
+  UnsafeCallOnNullableType:
+    active: false
+
+performance:
+  active: true
+  SpreadOperator:
+    active: false
