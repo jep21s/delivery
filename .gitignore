@@ -55,9 +55,8 @@ mvnw.cmd
 # === Gradle ===
 .gradle/
 build/
+.kotlin/
 !gradle/wrapper/gradle-wrapper.jar
-gradlew
-gradlew.bat
 
 # === Logs ===
 *.log

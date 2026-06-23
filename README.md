@@ -26,18 +26,9 @@ DELETE FROM public.orders;
 DELETE FROM public.outbox;
 ```
 
-# Генерация HTTP сервера
+# Сборка проекта (генерация HTTP-сервера из OpenAPI, gRPC-клиента и Kafka-событий из Protobuf)
 ```
-mvn clean compile
-```
-
-# Генерация gRPC клиента из Protobuf
-```
-mvn clean compile
-```
-# Генерация интеграционных событий Kafka из Protobuf
-```
-mvn clean compile
+./gradlew clean build
 ```
 
 ## Лицензия
