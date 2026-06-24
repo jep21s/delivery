@@ -5,7 +5,6 @@ import arrow.core.NonEmptyList
 import arrow.core.raise.accumulate
 import arrow.core.raise.either
 import libs.ddd.ValueObject
-import libs.errs.DomainInvariantException
 import libs.errs.Error
 import libs.errs.Guard
 import libs.errs.getValueOrThrow
