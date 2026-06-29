@@ -36,8 +36,8 @@ class LocationValueTest {
                 val second = LocationValue.create(case.b.first, case.b.second).getValueOrThrow()
 
                 // When
-                val resultFirstMinusSecond = first - second
-                val resultSecondMinusFirst = second - first
+                val resultFirstMinusSecond = first.distanceTo(second)
+                val resultSecondMinusFirst = second.distanceTo(first)
 
                 // Then
                 assertAll(

@@ -15,7 +15,7 @@ class LocationValue private constructor(
 ) : ValueObject<LocationValue>() {
     private val components: List<Int> by lazy(LazyThreadSafetyMode.NONE) { listOf(x, y) }
 
-    operator fun minus(other: LocationValue): Int {
+    fun distanceTo(other: LocationValue): Int {
         val xResult: Int = subtract(this.x, other.x)
         val yResult: Int = subtract(this.y, other.y)
         return xResult + yResult
@@ -34,16 +34,19 @@ class LocationValue private constructor(
     override fun equalityComponents(): Iterable<Any> = components
 
     companion object {
+        private const val MIN_COORDINATE_VALUE: Int = 1
+        private const val MAX_COORDINATE_VALUE: Int = 10
+
         fun create(
             x: Int,
             y: Int,
         ): Either<Error, LocationValue> =
             either<NonEmptyList<Error>, LocationValue> {
                 accumulate {
-                    Guard.againstLessThan(x, 1, LocationValue::x.name).bind()
-                    Guard.againstLessThan(y, 1, LocationValue::y.name).bind()
-                    Guard.againstGreaterThan(x, 10, LocationValue::x.name).bind()
-                    Guard.againstGreaterThan(y, 10, LocationValue::y.name).bind()
+                    Guard.againstLessThan(x, MIN_COORDINATE_VALUE, LocationValue::x.name).bind()
+                    Guard.againstLessThan(y, MIN_COORDINATE_VALUE, LocationValue::y.name).bind()
+                    Guard.againstGreaterThan(x, MAX_COORDINATE_VALUE, LocationValue::x.name).bind()
+                    Guard.againstGreaterThan(y, MAX_COORDINATE_VALUE, LocationValue::y.name).bind()
                     LocationValue(x, y)
                 }
             }.mapLeft { nel -> Error.of(nel.toList()) }
