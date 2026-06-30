@@ -1,13 +1,12 @@
-import io.gitlab.arturbosch.detekt.Detekt
 import java.net.URI
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    kotlin("jvm") version "2.0.21"
-    kotlin("plugin.spring") version "2.0.21"
-    kotlin("plugin.jpa") version "2.0.21"
-    kotlin("plugin.allopen") version "2.0.21"
-    id("com.google.devtools.ksp") version "2.0.21-1.0.28"
+    kotlin("jvm") version "2.3.20"
+    kotlin("plugin.spring") version "2.3.20"
+    kotlin("plugin.jpa") version "2.3.20"
+    kotlin("plugin.allopen") version "2.3.20"
+    id("com.google.devtools.ksp") version "2.3.9"
 
     id("org.springframework.boot") version "3.5.5"
     id("io.spring.dependency-management") version "1.1.6"
@@ -16,7 +15,11 @@ plugins {
     id("org.openapi.generator") version "7.10.0"
 
     id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
-    id("io.gitlab.arturbosch.detekt") version "1.23.8"
+    // TODO(detekt): вернуть после выхода detekt 2.0 stable + апгрейда Gradle до 9.x.
+    //  detekt 1.23.x несовместим с Kotlin 2.3.20 (скомпилирован Kotlin 2.0.21),
+    //  detekt 2.0-alpha требует Gradle 9.x и не опубликован на Plugin Portal.
+    //  До тех пор используется только ktlint.
+    // id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 
 group = "microarch"
@@ -36,9 +39,10 @@ repositories {
 // ---------------------------------------------------------------------------
 val grpcVersion = "1.57.2"
 val protobufVersion = "3.25.5"
-val konvertVersion = "4.1.0"
+val konvertVersion = "4.5.0"
 val testcontainersVersion = "1.21.3"
 val swaggerAnnotationsVersion = "2.2.14"
+val arrowVersion = "2.2.3"
 
 dependencies {
     // --- Spring Boot ------------------------------------------------------
@@ -72,6 +76,9 @@ dependencies {
     // --- Konvert (KSP-based маппер, замена MapStruct) ---------------------
     implementation("io.mcarle:konvert-annotations:$konvertVersion")
     ksp("io.mcarle:konvert:$konvertVersion")
+
+    // --- Arrow (замена самописного Result) --------------------------------
+    implementation("io.arrow-kt:arrow-core-jvm:$arrowVersion")
 
     // --- Тесты ------------------------------------------------------------
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -214,7 +221,7 @@ tasks.matching { it.name == "compileKotlin" || it.name == "kspKotlin" }.configur
 // ktlint + detekt
 // ---------------------------------------------------------------------------
 ktlint {
-    version.set("1.3.1")
+    version.set("1.8.0")
     android.set(false)
     outputToConsole.set(true)
     ignoreFailures.set(false)
@@ -223,17 +230,17 @@ ktlint {
     }
 }
 
-detekt {
-    buildUponDefaultConfig = true
-    allRules = false
-    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
-    ignoreFailures = false
-    // Исключаем сгенерированный код
-    source.setFrom(files("src/main/kotlin", "src/test/kotlin"))
-}
-
-tasks.withType<Detekt>().configureEach {
-    exclude("$openapiOutputDir/**")
-    exclude("**/generated/**")
-    jvmTarget = "21"
-}
+// TODO(detekt): восстановить блок конфигурации вместе с плагином после выхода detekt 2.0 stable.
+// detekt {
+//     buildUponDefaultConfig = true
+//     allRules = false
+//     config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+//     ignoreFailures = false
+//     source.setFrom(files("src/main/kotlin", "src/test/kotlin"))
+// }
+//
+// tasks.withType<Detekt>().configureEach {
+//     exclude("$openapiOutputDir/**")
+//     exclude("**/generated/**")
+//     jvmTarget = "21"
+// }
