@@ -4,16 +4,20 @@ import arrow.core.Either
 import arrow.core.NonEmptyList
 import arrow.core.raise.accumulate
 import arrow.core.raise.either
+import jakarta.persistence.Embeddable
+import jakarta.persistence.Transient
 import libs.ddd.ValueObject
 import libs.errs.Guard
 import libs.errs.LogicError
 import libs.errs.getValueOrThrow
 
+@Embeddable
 class LocationValue private constructor(
     val x: Int,
     val y: Int,
 ) : ValueObject<LocationValue>() {
-    private val components: List<Int> by lazy(LazyThreadSafetyMode.NONE) { listOf(x, y) }
+    @field:Transient
+    private val components: List<Int> = listOf(x, y)
 
     fun distanceTo(other: LocationValue): Int {
         val xResult: Int = subtract(this.x, other.x)

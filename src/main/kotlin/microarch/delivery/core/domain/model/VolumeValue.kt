@@ -1,11 +1,15 @@
 package microarch.delivery.core.domain.model
 
+import jakarta.persistence.Embeddable
+import jakarta.persistence.Transient
 import libs.ddd.ValueObject
 
+@Embeddable
 class VolumeValue(
     val value: Int,
 ) : ValueObject<VolumeValue>() {
-    private val components: List<Int> by lazy(LazyThreadSafetyMode.NONE) { listOf(value) }
+    @field:Transient
+    private val components: List<Int> = listOf(value)
 
     override fun equalityComponents(): Iterable<Any> = components
 
