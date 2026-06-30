@@ -53,6 +53,7 @@ dependencies {
 
     // --- БД ---------------------------------------------------------------
     runtimeOnly("org.postgresql:postgresql")
+    implementation("org.liquibase:liquibase-core")
 
     // --- Kotlin / Jackson -------------------------------------------------
     implementation("org.jetbrains.kotlin:kotlin-reflect")

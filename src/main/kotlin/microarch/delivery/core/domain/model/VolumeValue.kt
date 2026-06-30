@@ -1,17 +1,13 @@
 package microarch.delivery.core.domain.model
 
 import jakarta.persistence.Embeddable
-import jakarta.persistence.Transient
 import libs.ddd.ValueObject
 
 @Embeddable
 class VolumeValue(
     val value: Int,
 ) : ValueObject<VolumeValue>() {
-    @field:Transient
-    private val components: List<Int> = listOf(value)
-
-    override fun equalityComponents(): Iterable<Any> = components
+    override fun equalityComponents(): Iterable<Any> = listOf(value)
 
     operator fun plus(other: VolumeValue) = VolumeValue(this.value + other.value)
 }

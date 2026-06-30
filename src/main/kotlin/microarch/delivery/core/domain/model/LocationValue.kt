@@ -5,7 +5,6 @@ import arrow.core.NonEmptyList
 import arrow.core.raise.accumulate
 import arrow.core.raise.either
 import jakarta.persistence.Embeddable
-import jakarta.persistence.Transient
 import libs.ddd.ValueObject
 import libs.errs.Guard
 import libs.errs.LogicError
@@ -16,9 +15,6 @@ class LocationValue private constructor(
     val x: Int,
     val y: Int,
 ) : ValueObject<LocationValue>() {
-    @field:Transient
-    private val components: List<Int> = listOf(x, y)
-
     fun distanceTo(other: LocationValue): Int {
         val xResult: Int = subtract(this.x, other.x)
         val yResult: Int = subtract(this.y, other.y)
@@ -35,7 +31,7 @@ class LocationValue private constructor(
             otherCoordinate - thisCoordinate
         }
 
-    override fun equalityComponents(): Iterable<Any> = components
+    override fun equalityComponents(): Iterable<Any> = listOf(x, y)
 
     companion object {
         private const val MIN_COORDINATE_VALUE: Int = 1

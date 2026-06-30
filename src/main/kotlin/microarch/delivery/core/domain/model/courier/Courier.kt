@@ -10,8 +10,11 @@ import jakarta.persistence.Column
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
 import jakarta.persistence.MapKey
 import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import java.util.UUID
 import libs.ddd.Aggregate
 import libs.errs.LogicError
@@ -22,6 +25,7 @@ import microarch.delivery.core.domain.model.sum
 
 @Entity
 @ConsistentCopyVisibility
+@Table(name = "couriers")
 data class Courier private constructor(
     override val id: UUID,
     @field:Column(name = "name")
@@ -53,6 +57,11 @@ data class Courier private constructor(
         ],
         orphanRemoval = true,
         fetch = FetchType.EAGER,
+    )
+    @field:JoinTable(
+        name = "courier_assignments",
+        joinColumns = [JoinColumn(name = "courier_id")],
+        inverseJoinColumns = [JoinColumn(name = "assignment_id")],
     )
     @field:MapKey("id")
     private var _assignments: MutableMap<UUID, Assignment>,
