@@ -4,34 +4,34 @@ object GeneralErrors {
     fun <T> notFound(
         name: String,
         id: T,
-    ): Error {
+    ): LogicError {
         require(name.isNotBlank()) { "Name must not be null or empty" }
-        return Error.of("record.not.found", "Record not found. Name: $name, id: $id")
+        return LogicError.of("record.not.found", "Record not found. Name: $name, id: $id")
     }
 
     fun <T> valueIsInvalid(
         name: String,
         value: T,
-    ): Error {
+    ): LogicError {
         require(name.isNotBlank()) { "Name must not be null or empty" }
-        return Error.of("value.is.invalid", "Value '$value' is invalid for $name")
+        return LogicError.of("value.is.invalid", "Value '$value' is invalid for $name")
     }
 
-    fun valueIsRequired(name: String): Error {
+    fun valueIsRequired(name: String): LogicError {
         require(name.isNotBlank()) { "Name must not be null or empty" }
-        return Error.of("value.is.required", "Value is required for $name")
+        return LogicError.of("value.is.required", "Value is required for $name")
     }
 
-    fun invalidLength(name: String): Error {
+    fun invalidLength(name: String): LogicError {
         require(name.isNotBlank()) { "Name must not be null or empty" }
-        return Error.of("invalid.string.length", "Invalid $name length")
+        return LogicError.of("invalid.string.length", "Invalid $name length")
     }
 
     fun collectionIsTooSmall(
         min: Int,
         current: Int,
-    ): Error =
-        Error.of(
+    ): LogicError =
+        LogicError.of(
             "collection.is.too.small",
             "The collection must contain $min items or more. It contains $current items.",
         )
@@ -39,8 +39,8 @@ object GeneralErrors {
     fun collectionIsTooLarge(
         max: Int,
         current: Int,
-    ): Error =
-        Error.of(
+    ): LogicError =
+        LogicError.of(
             "collection.is.too.large",
             "The collection must contain $max items or fewer. It contains $current items.",
         )
@@ -50,19 +50,19 @@ object GeneralErrors {
         value: T,
         min: T,
         max: T,
-    ): Error {
+    ): LogicError {
         require(name.isNotBlank()) { "Name must not be null or empty" }
         val message = "Value $value for $name is out of range. Min value is $min, max value is $max."
-        return Error.of("value.is.out.of.range", message)
+        return LogicError.of("value.is.out.of.range", message)
     }
 
     fun <T : Comparable<T>> valueMustBeGreaterThan(
         name: String,
         value: T,
         min: T,
-    ): Error {
+    ): LogicError {
         require(name.isNotBlank()) { "Name must not be null or empty" }
-        return Error.of(
+        return LogicError.of(
             "value.must.be.greater.than",
             "The value of $name ($value) must be greater than $min.",
         )
@@ -72,9 +72,9 @@ object GeneralErrors {
         name: String,
         value: T,
         min: T,
-    ): Error {
+    ): LogicError {
         require(name.isNotBlank()) { "Name must not be null or empty" }
-        return Error.of(
+        return LogicError.of(
             "value.must.be.greater.or.equal",
             "The value of $name ($value) must be greater than or equal to $min.",
         )
@@ -84,9 +84,9 @@ object GeneralErrors {
         name: String,
         value: T,
         max: T,
-    ): Error {
+    ): LogicError {
         require(name.isNotBlank()) { "Name must not be null or empty" }
-        return Error.of(
+        return LogicError.of(
             "value.must.be.less.than",
             "The value of $name ($value) must be less than $max.",
         )
@@ -96,9 +96,9 @@ object GeneralErrors {
         name: String,
         value: T,
         max: T,
-    ): Error {
+    ): LogicError {
         require(name.isNotBlank()) { "Name must not be null or empty" }
-        return Error.of(
+        return LogicError.of(
             "value.must.be.less.or.equal",
             "The value of $name ($value) must be less than or equal to $max.",
         )

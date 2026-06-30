@@ -11,12 +11,12 @@ abstract class BaseEntity<TId : Comparable<TId>> protected constructor(
     @field:Column(name = "id")
     val id: TId,
 ) : Comparable<BaseEntity<TId>> {
-    override fun equals(obj: Any?): Boolean {
-        if (obj == null) return false
-        if (this === obj) return true
-        if (obj !is BaseEntity<*>) return false
-        if (this.javaClass != obj.javaClass) return false
-        return Objects.equals(this.id, obj.id)
+    override fun equals(other: Any?): Boolean {
+        if (other == null) return false
+        if (this === other) return true
+        if (other !is BaseEntity<*>) return false
+        if (this.javaClass != other.javaClass) return false
+        return Objects.equals(this.id, other.id)
     }
 
     override fun hashCode(): Int = (javaClass.name + (id.toString())).hashCode()

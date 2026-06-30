@@ -1,5 +1,5 @@
 package libs.errs
 
 class DomainInvariantException(
-    error: Error,
+    error: LogicError,
 ) : RuntimeException("Domain invariant violated: ${error.fullMessage()}")

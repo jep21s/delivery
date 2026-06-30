@@ -42,7 +42,7 @@ val protobufVersion = "3.25.5"
 val konvertVersion = "4.5.0"
 val testcontainersVersion = "1.21.3"
 val swaggerAnnotationsVersion = "2.2.14"
-val arrowVersion = "2.2.3"
+val arrowVersion = "2.2.2.1"
 
 dependencies {
     // --- Spring Boot ------------------------------------------------------

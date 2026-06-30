@@ -2,10 +2,10 @@ package libs.errs
 
 import java.util.Objects
 
-class Error private constructor(
+class LogicError private constructor(
     val code: String,
     val message: String,
-    val children: List<Error> = emptyList(),
+    val children: List<LogicError> = emptyList(),
 ) {
     fun fullMessage(): String {
         val messages = mutableListOf<String>()
@@ -29,7 +29,7 @@ class Error private constructor(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is Error) return false
+        if (other !is LogicError) return false
         return code == other.code && message == other.message && children == other.children
     }
 
@@ -51,11 +51,11 @@ class Error private constructor(
         fun of(
             code: String,
             message: String,
-        ): Error = Error(code, message)
+        ): LogicError = LogicError(code, message)
 
-        fun of(errors: List<Error>): Error = Error("", "", errors)
+        fun of(errors: List<LogicError>): LogicError = LogicError("", "", errors)
 
-        fun deserialize(serialized: String): Error {
+        fun deserialize(serialized: String): LogicError {
             if ("A non-empty request body is required." == serialized) {
                 return GeneralErrors.valueIsRequired("serialized")
             }
@@ -65,7 +65,7 @@ class Error private constructor(
             if (braceIdx == -1) {
                 val parts = serialized.split(SEPARATOR)
                 require(parts.size >= 2) { "Invalid error serialization: '$serialized'" }
-                return Error(parts[0], parts[1])
+                return LogicError(parts[0], parts[1])
             }
 
             val base = serialized.substring(0, braceIdx)
@@ -76,7 +76,7 @@ class Error private constructor(
             val childStrings = splitTopLevel(inner)
             val children = childStrings.map { deserialize(it) }
 
-            return Error(parts[0], parts[1], children)
+            return LogicError(parts[0], parts[1], children)
         }
 
         private fun splitTopLevel(str: String): List<String> {
