@@ -12,7 +12,6 @@ import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
-import jakarta.persistence.MapKey
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import java.util.UUID
@@ -24,12 +23,11 @@ import microarch.delivery.core.domain.model.assignment.Assignment
 import microarch.delivery.core.domain.model.sum
 
 @Entity
-@ConsistentCopyVisibility
 @Table(name = "couriers")
-data class Courier private constructor(
-    override val id: UUID,
+class Courier private constructor(
+    override var id: UUID,
     @field:Column(name = "name")
-    val name: String,
+    var name: String,
     @field:Embedded
     @field:AttributeOverrides(
         AttributeOverride(
@@ -47,7 +45,7 @@ data class Courier private constructor(
         name = "value",
         column = Column(name = "max_volume"),
     )
-    val maxVolume: VolumeValue,
+    var maxVolume: VolumeValue,
     @field:OneToMany(
         cascade = [
             CascadeType.PERSIST,
@@ -63,15 +61,12 @@ data class Courier private constructor(
         joinColumns = [JoinColumn(name = "courier_id")],
         inverseJoinColumns = [JoinColumn(name = "assignment_id")],
     )
-    @field:MapKey("id")
-    private var _assignments: MutableMap<UUID, Assignment>,
+    var assignments: MutableList<Assignment>,
 ) : Aggregate<UUID>(id) {
-    val assignments: List<Assignment>
-        get() = _assignments.values.toList()
-
     fun isCanTakeOrder(newOrderVolume: VolumeValue): Boolean {
         val currentAssignmentsVolume: VolumeValue =
             assignments
+                .filter { it.status == Assignment.Status.ASSIGNED }
                 .map { it.volume }
                 .sum()
         return (currentAssignmentsVolume + newOrderVolume) <= this.maxVolume
@@ -89,19 +84,29 @@ data class Courier private constructor(
                             "order id: ${newOrder.id}",
                 ).left()
         }
+
+        val isOrderAlreadyExist: Boolean = assignments.any { it.orderId == newOrder.id }
+        if (isOrderAlreadyExist) {
+            return LogicError
+                .of(
+                    code = "400",
+                    message = "Courier has taken order ${newOrder.id} already",
+                ).left()
+        }
+
         val assignment =
             Assignment.create(
                 orderId = newOrder.id,
                 volume = newOrder.volume,
                 location = newOrder.location,
             )
-        _assignments[assignment.id] = assignment
+        assignments.add(assignment)
         return Unit.right()
     }
 
     fun completeAssignment(assignmentId: UUID): Either<LogicError, Unit> {
         val assignment =
-            _assignments[assignmentId]
+            assignments.find { it.id == assignmentId }
                 ?: return LogicError
                     .of(
                         "404",
@@ -109,11 +114,7 @@ data class Courier private constructor(
                             "cause courier ${this.id} doesn't has Assignment $assignmentId",
                     ).left()
 
-        return assignment
-            .getCompletedAssignment(this.location)
-            .map { completedAssignment: Assignment ->
-                _assignments[completedAssignment.id] = completedAssignment
-            }
+        return assignment.completeAssignment(this.location)
     }
 
     fun moveTo(newLocation: LocationValue): Either<LogicError, Unit> {
@@ -151,7 +152,7 @@ data class Courier private constructor(
             name = name,
             location = location,
             maxVolume = VolumeValue(MAX_VOLUME),
-            _assignments = mutableMapOf(),
+            assignments = mutableListOf(),
         )
     }
 }

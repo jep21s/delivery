@@ -50,22 +50,17 @@ class OrderDistributionServiceImplTest {
                             .isTrue()
                     },
                     {
-                        assertThat(result.getOrNull()?.courier)
+                        assertThat(result.getOrNull())
                             .describedAs("winner courier")
                             .isSameAs(expectedWinner)
                     },
                     {
-                        assertThat(result.getOrNull()?.order?.status)
-                            .describedAs("assigned order status")
+                        assertThat(order.status)
+                            .describedAs("order assigned")
                             .isEqualTo(OrderStatus.ASSIGNED)
                     },
                     {
-                        assertThat(result.getOrNull()?.order?.id)
-                            .describedAs("order id preserved")
-                            .isEqualTo(order.id)
-                    },
-                    {
-                        val winner = result.getOrNull()?.courier
+                        val winner = result.getOrNull()
                         assertThat(winner?.assignments).describedAs("assignment created").hasSize(1)
                         assertThat(winner?.assignments?.first()?.orderId)
                             .describedAs("assignment orderId")
@@ -114,7 +109,7 @@ class OrderDistributionServiceImplTest {
                             .isTrue()
                     },
                     {
-                        assertThat(result.getOrNull()?.courier)
+                        assertThat(result.getOrNull())
                             .describedAs("winner is far (fits) courier")
                             .isSameAs(farCourier)
                     },
@@ -131,25 +126,30 @@ class OrderDistributionServiceImplTest {
     @TestFactory
     fun `distribute breaks distance tie by keeping first in list`(): List<DynamicTest> {
         // Given — два курьера на равном минимальном расстоянии, победитель — первый в списке
-        val order = order(5 to 5, volume = 1)
-        val first = Courier.create("first", LocationValue.createOrThrow(5, 6))
-        val second = Courier.create("second", LocationValue.createOrThrow(6, 5))
-        val swapped = listOf(second, first)
-
         return listOf(
             DynamicTest.dynamicTest("[first, second] -> first wins") {
+                // Given — свежие объекты для каждого кейса (distribute мутирует order)
+                val order = order(5 to 5, volume = 1)
+                val first = Courier.create("first", LocationValue.createOrThrow(5, 6))
+                val second = Courier.create("second", LocationValue.createOrThrow(6, 5))
+
                 // When
                 val result = service.distribute(order, listOf(first, second))
 
                 // Then
-                assertThat(result.getOrNull()?.courier).isSameAs(first)
+                assertThat(result.getOrNull()).isSameAs(first)
             },
             DynamicTest.dynamicTest("[second, first] -> second wins (order swapped)") {
+                // Given — свежие объекты для каждого кейса (distribute мутирует order)
+                val order = order(5 to 5, volume = 1)
+                val first = Courier.create("first", LocationValue.createOrThrow(5, 6))
+                val second = Courier.create("second", LocationValue.createOrThrow(6, 5))
+
                 // When
-                val result = service.distribute(order, swapped)
+                val result = service.distribute(order, listOf(second, first))
 
                 // Then
-                assertThat(result.getOrNull()?.courier).isSameAs(second)
+                assertThat(result.getOrNull()).isSameAs(second)
             },
         )
     }
@@ -245,28 +245,28 @@ class OrderDistributionServiceImplTest {
     }
 
     @TestFactory
-    fun `distribute does not mutate the original order`(): List<DynamicTest> {
-        // Given — оригинальный заказ остаётся в статусе CREATED (иммутабельность)
+    fun `distribute mutates the original order to ASSIGNED`(): List<DynamicTest> {
+        // Given — distribute мутирует статус заказа на ASSIGNED
         val orderLocation = 5 to 5
         val order = order(orderLocation, volume = 1)
         val courier = Courier.create("courier", LocationValue.createOrThrow(5, 5))
 
         return listOf(
-            DynamicTest.dynamicTest("original order stays CREATED after distribute") {
+            DynamicTest.dynamicTest("order becomes ASSIGNED after distribute") {
                 // When
                 val result = service.distribute(order, listOf(courier))
 
                 // Then
                 assertAll(
                     {
-                        assertThat(result.getOrNull()?.order?.status)
-                            .describedAs("returned order is ASSIGNED")
-                            .isEqualTo(OrderStatus.ASSIGNED)
+                        assertThat(result.isRight())
+                            .describedAs("distribute is right")
+                            .isTrue()
                     },
                     {
                         assertThat(order.status)
-                            .describedAs("original order unchanged")
-                            .isEqualTo(OrderStatus.CREATED)
+                            .describedAs("order status ASSIGNED")
+                            .isEqualTo(OrderStatus.ASSIGNED)
                     },
                 )
             },

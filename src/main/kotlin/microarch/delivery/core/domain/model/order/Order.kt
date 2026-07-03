@@ -18,10 +18,9 @@ import microarch.delivery.core.domain.model.LocationValue
 import microarch.delivery.core.domain.model.VolumeValue
 
 @Entity
-@ConsistentCopyVisibility
 @Table(name = "orders")
-data class Order private constructor(
-    override val id: UUID,
+class Order private constructor(
+    override var id: UUID,
     @field:Embedded
     @field:AttributeOverrides(
         AttributeOverride(
@@ -33,18 +32,18 @@ data class Order private constructor(
             column = Column(name = "y_coordinate"),
         ),
     )
-    val location: LocationValue,
+    var location: LocationValue,
     @field:Embedded
     @field:AttributeOverride(
         name = "value",
         column = Column(name = "volume"),
     )
-    val volume: VolumeValue,
+    var volume: VolumeValue,
     @field:Column(name = "status")
     @Enumerated(EnumType.STRING)
-    val status: OrderStatus,
+    var status: OrderStatus,
 ) : Aggregate<UUID>(id) {
-    fun getAssignedOrder(): Either<LogicError, Order> {
+    fun assignOrder(): Either<LogicError, Unit> {
         if (this.status != OrderStatus.CREATED) {
             return LogicError
                 .of(
@@ -53,10 +52,12 @@ data class Order private constructor(
                         "Current status: ${this.status}",
                 ).left()
         }
-        return copy(status = OrderStatus.ASSIGNED).right()
+        status = OrderStatus.ASSIGNED
+
+        return Unit.right()
     }
 
-    fun getCompletedOrder(): Either<LogicError, Order> {
+    fun completeOrder(): Either<LogicError, Unit> {
         if (this.status != OrderStatus.ASSIGNED) {
             return LogicError
                 .of(
@@ -65,7 +66,9 @@ data class Order private constructor(
                         "Current status: ${this.status}",
                 ).left()
         }
-        return copy(status = OrderStatus.COMPLETED).right()
+        this.status = OrderStatus.COMPLETED
+
+        return Unit.right()
     }
 
     companion object {

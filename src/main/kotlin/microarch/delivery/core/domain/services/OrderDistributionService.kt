@@ -6,14 +6,13 @@ import arrow.core.raise.either
 import libs.errs.LogicError
 import microarch.delivery.core.domain.model.courier.Courier
 import microarch.delivery.core.domain.model.order.Order
-import microarch.delivery.core.domain.services.dto.DistributionResult
 import org.springframework.stereotype.Service
 
 interface OrderDistributionService {
     fun distribute(
         order: Order,
         couriers: List<Courier>,
-    ): Either<LogicError, DistributionResult>
+    ): Either<LogicError, Courier>
 }
 
 @Service
@@ -21,7 +20,7 @@ class OrderDistributionServiceImpl : OrderDistributionService {
     override fun distribute(
         order: Order,
         couriers: List<Courier>,
-    ): Either<LogicError, DistributionResult> {
+    ): Either<LogicError, Courier> {
         val winner: Courier =
             getWinnerCourier(couriers, order)
                 ?: return LogicError
@@ -31,19 +30,19 @@ class OrderDistributionServiceImpl : OrderDistributionService {
                     ).left()
 
         return either {
-            val assignedOrder: Order =
-                order
-                    .getAssignedOrder()
-                    .bind()
-            winner
-                .takeOrder(
+            order
+                .assignOrder()
+                .bind()
+
+            winner.apply {
+                takeOrder(
                     Courier.NewOrder(
                         id = order.id,
                         volume = order.volume,
                         location = order.location,
                     ),
                 ).bind()
-            DistributionResult(winner, assignedOrder)
+            }
         }
     }
 
