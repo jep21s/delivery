@@ -5,7 +5,7 @@ import jakarta.persistence.Transient
 
 @MappedSuperclass
 abstract class Aggregate<TId : Comparable<TId>> protected constructor(
-    id: TId? = null,
+    id: TId,
 ) : BaseEntity<TId>(id),
     AggregateRoot<TId> {
     @Transient
