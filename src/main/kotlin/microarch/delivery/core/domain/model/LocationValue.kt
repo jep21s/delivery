@@ -5,8 +5,8 @@ import arrow.core.NonEmptyList
 import arrow.core.raise.accumulate
 import arrow.core.raise.either
 import libs.ddd.ValueObject
-import libs.errs.Error
 import libs.errs.Guard
+import libs.errs.LogicError
 import libs.errs.getValueOrThrow
 
 class LocationValue private constructor(
@@ -40,8 +40,8 @@ class LocationValue private constructor(
         fun create(
             x: Int,
             y: Int,
-        ): Either<Error, LocationValue> =
-            either<NonEmptyList<Error>, LocationValue> {
+        ): Either<LogicError, LocationValue> =
+            either<NonEmptyList<LogicError>, LocationValue> {
                 accumulate {
                     Guard.againstLessThan(x, MIN_COORDINATE_VALUE, LocationValue::x.name).bind()
                     Guard.againstLessThan(y, MIN_COORDINATE_VALUE, LocationValue::y.name).bind()
@@ -49,7 +49,7 @@ class LocationValue private constructor(
                     Guard.againstGreaterThan(y, MAX_COORDINATE_VALUE, LocationValue::y.name).bind()
                     LocationValue(x, y)
                 }
-            }.mapLeft { nel -> Error.of(nel.toList()) }
+            }.mapLeft { nel -> LogicError.of(nel.toList()) }
 
         fun createOrThrow(
             x: Int,

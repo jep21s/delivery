@@ -12,6 +12,7 @@ import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import java.util.UUID
 import libs.ddd.BaseEntity
+import libs.errs.LogicError
 import microarch.delivery.core.domain.model.LocationValue
 import microarch.delivery.core.domain.model.VolumeValue
 
@@ -43,16 +44,21 @@ data class Assignment private constructor(
     @field:Enumerated(EnumType.STRING)
     val status: Status,
 ) : BaseEntity<UUID>(id) {
-    fun getCompletedAssignment(courierLocation: LocationValue): Either<Error, Assignment> {
+    fun getCompletedAssignment(courierLocation: LocationValue): Either<LogicError, Assignment> {
         if (this.location != courierLocation) {
-            return Error(
-                "The courier is not close enough. " +
-                    "Courier location: $courierLocation, " +
-                    "Assignment location: ${this.location}",
-            ).left()
+            return LogicError
+                .of(
+                    code = "400",
+                    message =
+                        "The courier is not close enough. " +
+                            "Courier location: $courierLocation, " +
+                            "Assignment location: ${this.location}",
+                ).left()
         }
         if (this.status == Status.COMPLETED) {
-            return Error("Assignment has completed already").left()
+            return LogicError
+                .of("400", "Assignment has completed already")
+                .left()
         }
 
         return copy(status = Status.COMPLETED).right()
