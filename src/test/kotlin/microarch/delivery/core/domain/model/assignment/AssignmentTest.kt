@@ -70,7 +70,7 @@ class AssignmentTest {
                 val assignment = Assignment.create(UUID.randomUUID(), VolumeValue(1), location)
 
                 // When
-                val result = assignment.getCompletedAssignment(location)
+                val result = assignment.completeAssignment(location)
 
                 // Then
                 assertAll(
@@ -80,17 +80,17 @@ class AssignmentTest {
                             .isTrue()
                     },
                     {
-                        val completed = result.getOrNull()
-                        assertThat(completed).describedAs("completed assignment").isNotNull
-                        assertThat(completed?.status).describedAs("status").isEqualTo(Assignment.Status.COMPLETED)
+                        assertThat(assignment.status)
+                            .describedAs("status")
+                            .isEqualTo(Assignment.Status.COMPLETED)
                     },
                     {
-                        assertThat(result.getOrNull()?.location)
+                        assertThat(assignment.location)
                             .describedAs("location preserved")
                             .isEqualTo(location)
                     },
                     {
-                        assertThat(result.getOrNull()?.orderId)
+                        assertThat(assignment.orderId)
                             .describedAs("orderId preserved")
                             .isEqualTo(assignment.orderId)
                     },
@@ -126,7 +126,7 @@ class AssignmentTest {
                 val assignment = Assignment.create(UUID.randomUUID(), VolumeValue(1), assignmentLocation)
 
                 // When
-                val result = assignment.getCompletedAssignment(courierLocation)
+                val result = assignment.completeAssignment(courierLocation)
 
                 // Then
                 assertAll(
@@ -165,10 +165,10 @@ class AssignmentTest {
                 // Given
                 val location = LocationValue.createOrThrow(case.location.first, case.location.second)
                 val assignment = Assignment.create(UUID.randomUUID(), VolumeValue(1), location)
-                val completed = assignment.getCompletedAssignment(location).getOrNull()!!
+                assignment.completeAssignment(location).getOrNull()!!
 
                 // When
-                val result = completed.getCompletedAssignment(location)
+                val result = assignment.completeAssignment(location)
 
                 // Then
                 assertAll(

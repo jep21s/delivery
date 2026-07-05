@@ -18,18 +18,17 @@ import microarch.delivery.core.domain.model.LocationValue
 import microarch.delivery.core.domain.model.VolumeValue
 
 @Entity
-@ConsistentCopyVisibility
 @Table(name = "assignments")
-data class Assignment private constructor(
+class Assignment private constructor(
     override val id: UUID,
     @field:Column(name = "order_id")
-    val orderId: UUID,
+    var orderId: UUID,
     @field:Embedded
     @field:AttributeOverride(
         name = "value",
         column = Column(name = "volume"),
     )
-    val volume: VolumeValue,
+    var volume: VolumeValue,
     @field:Embedded
     @field:AttributeOverrides(
         AttributeOverride(
@@ -41,12 +40,12 @@ data class Assignment private constructor(
             column = Column(name = "y_coordinate"),
         ),
     )
-    val location: LocationValue,
+    var location: LocationValue,
     @field:Column(name = "status")
     @field:Enumerated(EnumType.STRING)
-    val status: Status,
+    var status: Status,
 ) : BaseEntity<UUID>(id) {
-    fun getCompletedAssignment(courierLocation: LocationValue): Either<LogicError, Assignment> {
+    fun completeAssignment(courierLocation: LocationValue): Either<LogicError, Unit> {
         if (this.location != courierLocation) {
             return LogicError
                 .of(
@@ -57,13 +56,14 @@ data class Assignment private constructor(
                             "Assignment location: ${this.location}",
                 ).left()
         }
-        if (this.status == Status.COMPLETED) {
+        if (this.status != Status.ASSIGNED) {
             return LogicError
                 .of("400", "Assignment has completed already")
                 .left()
         }
 
-        return copy(status = Status.COMPLETED).right()
+        this.status = Status.COMPLETED
+        return Unit.right()
     }
 
     enum class Status {

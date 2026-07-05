@@ -64,12 +64,13 @@ class OrderTest {
         return cases.map { case ->
             DynamicTest.dynamicTest("assign order at ${case.location} with volume ${case.volume}") {
                 // Given
+                val id = UUID.randomUUID()
                 val location = LocationValue.createOrThrow(case.location.first, case.location.second)
                 val volume = VolumeValue(case.volume)
-                val order = Order.create(UUID.randomUUID(), location, volume)
+                val order = Order.create(id, location, volume)
 
                 // When
-                val result = order.getAssignedOrder()
+                val result = order.assignOrder()
 
                 // Then
                 assertAll(
@@ -79,24 +80,24 @@ class OrderTest {
                             .isTrue()
                     },
                     {
-                        val assigned = result.getOrNull()
-                        assertThat(assigned).describedAs("assigned order").isNotNull
-                        assertThat(assigned?.status).describedAs("status").isEqualTo(OrderStatus.ASSIGNED)
+                        assertThat(order.status)
+                            .describedAs("status")
+                            .isEqualTo(OrderStatus.ASSIGNED)
                     },
                     {
-                        assertThat(result.getOrNull()?.id)
+                        assertThat(order.id)
                             .describedAs("id preserved")
-                            .isEqualTo(order.id)
+                            .isEqualTo(id)
                     },
                     {
-                        assertThat(result.getOrNull()?.location)
+                        assertThat(order.location)
                             .describedAs("location preserved")
-                            .isEqualTo(order.location)
+                            .isEqualTo(location)
                     },
                     {
-                        assertThat(result.getOrNull()?.volume)
+                        assertThat(order.volume)
                             .describedAs("volume preserved")
-                            .isEqualTo(order.volume)
+                            .isEqualTo(volume)
                     },
                 )
             }
@@ -117,14 +118,13 @@ class OrderTest {
         val cases =
             listOf(
                 Case(OrderStatus.ASSIGNED) { order ->
-                    order.getAssignedOrder().getOrNull()!!
+                    order.assignOrder().getOrNull()!!
+                    order
                 },
                 Case(OrderStatus.COMPLETED) { order ->
+                    order.assignOrder().getOrNull()!!
+                    order.completeOrder().getOrNull()!!
                     order
-                        .getAssignedOrder()
-                        .getOrNull()!!
-                        .getCompletedOrder()
-                        .getOrNull()!!
                 },
             )
 
@@ -134,7 +134,7 @@ class OrderTest {
                 val order = case.setup(Order.create(UUID.randomUUID(), location, volume))
 
                 // When
-                val result = order.getAssignedOrder()
+                val result = order.assignOrder()
 
                 // Then
                 assertAll(
@@ -159,7 +159,7 @@ class OrderTest {
     }
 
     @TestFactory
-    fun `getCompletedOrder succeeds when status is ASSIGNED`(): List<DynamicTest> {
+    fun `completeOrder succeeds when status is ASSIGNED`(): List<DynamicTest> {
         // Given — назначенный заказ (ASSIGNED) переводим в COMPLETED
         data class Case(
             val location: Pair<Int, Int>,
@@ -178,37 +178,33 @@ class OrderTest {
                 // Given
                 val location = LocationValue.createOrThrow(case.location.first, case.location.second)
                 val volume = VolumeValue(case.volume)
-                val assigned = Order.create(UUID.randomUUID(), location, volume).getAssignedOrder().getOrNull()!!
+                val order = Order.create(UUID.randomUUID(), location, volume)
+                order.assignOrder().getOrNull()!!
 
                 // When
-                val result = assigned.getCompletedOrder()
+                val result = order.completeOrder()
 
                 // Then
                 assertAll(
                     {
                         assertThat(result.isRight())
-                            .describedAs("getCompletedOrder is right")
+                            .describedAs("completeOrder is right")
                             .isTrue()
                     },
                     {
-                        val completed = result.getOrNull()
-                        assertThat(completed).describedAs("completed order").isNotNull
-                        assertThat(completed?.status).describedAs("status").isEqualTo(OrderStatus.COMPLETED)
+                        assertThat(order.status)
+                            .describedAs("status")
+                            .isEqualTo(OrderStatus.COMPLETED)
                     },
                     {
-                        assertThat(result.getOrNull()?.id)
-                            .describedAs("id preserved")
-                            .isEqualTo(assigned.id)
-                    },
-                    {
-                        assertThat(result.getOrNull()?.location)
+                        assertThat(order.location)
                             .describedAs("location preserved")
-                            .isEqualTo(assigned.location)
+                            .isEqualTo(location)
                     },
                     {
-                        assertThat(result.getOrNull()?.volume)
+                        assertThat(order.volume)
                             .describedAs("volume preserved")
-                            .isEqualTo(assigned.volume)
+                            .isEqualTo(volume)
                     },
                 )
             }
@@ -216,7 +212,7 @@ class OrderTest {
     }
 
     @TestFactory
-    fun `getCompletedOrder fails when status is not ASSIGNED`(): List<DynamicTest> {
+    fun `completeOrder fails when status is not ASSIGNED`(): List<DynamicTest> {
         // Given — заказ в статусе CREATED (ещё не назначен) или уже COMPLETED
         data class Case(
             val status: OrderStatus,
@@ -230,11 +226,9 @@ class OrderTest {
             listOf(
                 Case(OrderStatus.CREATED) { order -> order },
                 Case(OrderStatus.COMPLETED) { order ->
+                    order.assignOrder().getOrNull()!!
+                    order.completeOrder().getOrNull()!!
                     order
-                        .getAssignedOrder()
-                        .getOrNull()!!
-                        .getCompletedOrder()
-                        .getOrNull()!!
                 },
             )
 
@@ -244,13 +238,13 @@ class OrderTest {
                 val order = case.setup(Order.create(UUID.randomUUID(), location, volume))
 
                 // When
-                val result = order.getCompletedOrder()
+                val result = order.completeOrder()
 
                 // Then
                 assertAll(
                     {
                         assertThat(result.isLeft())
-                            .describedAs("getCompletedOrder is left")
+                            .describedAs("completeOrder is left")
                             .isTrue()
                     },
                     {

@@ -58,8 +58,8 @@ class OrderRepositoryIntegrationTest {
         flushAndClear()
 
         // When — переход CREATED -> ASSIGNED и обновление
-        val assigned = order.getAssignedOrder().getOrNull()
-        orderRepository.update(assigned!!)
+        order.assignOrder().getOrNull()!!
+        orderRepository.update(order)
         flushAndClear()
         val found = orderRepository.getById(order.id)
 
@@ -90,7 +90,8 @@ class OrderRepositoryIntegrationTest {
             orderRepository.add(
                 Order.create(UUID.randomUUID(), LocationValue.createOrThrow(2, 2), VolumeValue(1)),
             )
-        orderRepository.update(order.getAssignedOrder().getOrNull()!!)
+        order.assignOrder().getOrNull()!!
+        orderRepository.update(order)
         flushAndClear()
 
         // When
@@ -138,9 +139,10 @@ class OrderRepositoryIntegrationTest {
     private fun orderInStatus(status: OrderStatus): Order {
         var current = Order.create(UUID.randomUUID(), LocationValue.createOrThrow(1, 1), VolumeValue(1))
         if (status == OrderStatus.CREATED) return current
-        current = current.getAssignedOrder().getOrNull()!!
+        current.assignOrder().getOrNull()!!
         if (status == OrderStatus.ASSIGNED) return current
-        return current.getCompletedOrder().getOrNull()!!
+        current.completeOrder().getOrNull()!!
+        return current
     }
 
     private fun flushAndClear() {
