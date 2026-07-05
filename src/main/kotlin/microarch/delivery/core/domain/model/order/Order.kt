@@ -10,6 +10,7 @@ import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import jakarta.persistence.Table
 import java.util.UUID
 import libs.ddd.Aggregate
 import libs.errs.LogicError
@@ -18,6 +19,7 @@ import microarch.delivery.core.domain.model.VolumeValue
 
 @Entity
 @ConsistentCopyVisibility
+@Table(name = "orders")
 data class Order private constructor(
     override val id: UUID,
     @field:Embedded

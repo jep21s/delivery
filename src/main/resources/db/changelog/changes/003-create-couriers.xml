@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.18.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="003-create-couriers" author="jep21s">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="couriers"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="couriers">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_couriers"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="x_coordinate" type="INT"/>
+            <column name="y_coordinate" type="INT"/>
+            <column name="max_volume" type="INT"/>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="couriers"/>
+        </rollback>
+
+    </changeSet>
+
+    <changeSet id="003-create-courier-assignments" author="jep21s">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="courier_assignments"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="courier_assignments">
+            <column name="courier_id" type="UUID">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_courier_assignments"
+                             referencedTableName="couriers"
+                             referencedColumnNames="id"
+                             foreignKeyName="fk_courier_assignments_courier"/>
+            </column>
+            <column name="assignment_id" type="UUID">
+                <constraints nullable="false"
+                             unique="true"
+                             uniqueConstraintName="uc_courier_assignments_assignment"
+                             referencedTableName="assignments"
+                             referencedColumnNames="id"
+                             foreignKeyName="fk_courier_assignments_assignment"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="courier_assignments"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -115,3 +115,4 @@ docker-compose.dev.yml
 
 # === OS системные ===
 Thumbs.db
+/amplicode.xml
