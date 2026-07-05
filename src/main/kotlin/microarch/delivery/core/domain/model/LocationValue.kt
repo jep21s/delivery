@@ -34,8 +34,8 @@ class LocationValue private constructor(
     override fun equalityComponents(): Iterable<Any> = listOf(x, y)
 
     companion object {
-        private const val MIN_COORDINATE_VALUE: Int = 1
-        private const val MAX_COORDINATE_VALUE: Int = 10
+        const val MIN_COORDINATE_VALUE: Int = 1
+        const val MAX_COORDINATE_VALUE: Int = 10
 
         fun create(
             x: Int,

@@ -43,6 +43,8 @@ val konvertVersion = "4.5.0"
 val testcontainersVersion = "1.21.3"
 val swaggerAnnotationsVersion = "2.2.14"
 val arrowVersion = "2.2.2.1"
+val mockkVersion = "1.13.13"
+val springmockkVersion = "4.0.2"
 
 dependencies {
     // --- Spring Boot ------------------------------------------------------
@@ -89,6 +91,8 @@ dependencies {
     testImplementation("org.testcontainers:kafka:$testcontainersVersion")
     testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
     testImplementation("org.reflections:reflections:0.10.2")
+    testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("com.ninja-squad:springmockk:$springmockkVersion")
 }
 
 // ---------------------------------------------------------------------------
