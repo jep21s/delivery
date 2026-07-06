@@ -9,15 +9,16 @@ abstract class Aggregate<TId : Comparable<TId>> protected constructor(
 ) : BaseEntity<TId>(id),
     AggregateRoot<TId> {
     @Transient
-    private var _domainEvents: MutableList<DomainEvent> = mutableListOf()
+    private var _domainEvents: MutableList<DomainEvent>? = mutableListOf()
 
-    override fun getDomainEvents(): List<DomainEvent> = _domainEvents.toList()
+    override fun getDomainEvents(): List<DomainEvent> = _domainEvents?.toList() ?: emptyList()
 
     override fun clearDomainEvents() {
-        _domainEvents.clear()
+        _domainEvents?.clear()
     }
 
     fun raiseDomainEvent(domainEvent: DomainEvent) {
-        _domainEvents.add(domainEvent)
+        if (_domainEvents == null) _domainEvents = mutableListOf()
+        _domainEvents!!.add(domainEvent)
     }
 }

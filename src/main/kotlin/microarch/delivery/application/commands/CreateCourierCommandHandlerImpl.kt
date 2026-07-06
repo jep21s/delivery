@@ -2,6 +2,7 @@ package microarch.delivery.application.commands
 
 import arrow.core.Either
 import arrow.core.raise.either
+import java.util.UUID
 import kotlin.random.Random
 import libs.ddd.DomainEventPublisher
 import libs.errs.LogicError
@@ -17,7 +18,7 @@ class CreateCourierCommandHandlerImpl(
     private val domainEventPublisher: DomainEventPublisher,
 ) : CreateCourierCommandHandler {
     @Transactional
-    override fun handle(command: CreateCourierCommand): Either<LogicError, Unit> =
+    override fun handle(command: CreateCourierCommand): Either<LogicError, UUID> =
         either {
             val courier =
                 Courier.create(
@@ -30,5 +31,6 @@ class CreateCourierCommandHandlerImpl(
                 )
             val saved = courierRepository.add(courier)
             domainEventPublisher.publish(listOf(saved))
+            saved.id
         }
 }

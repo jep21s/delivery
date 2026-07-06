@@ -45,12 +45,14 @@ val swaggerAnnotationsVersion = "2.2.14"
 val arrowVersion = "2.2.2.1"
 val mockkVersion = "1.13.13"
 val springmockkVersion = "4.0.2"
+val kotlinLoggingVersion = "7.0.3"
 
 dependencies {
     // --- Spring Boot ------------------------------------------------------
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-quartz")
     implementation("org.springframework.kafka:spring-kafka")
 
     // --- БД ---------------------------------------------------------------
@@ -62,6 +64,9 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.openapitools:jackson-databind-nullable:0.2.6")
+
+    // --- Логирование (Kotlin-friendly facade поверх SLF4J) ----------------
+    implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
 
     // --- OpenAPI (аннотации для kotlin-spring генератора) -----------------
     implementation("io.swagger.core.v3:swagger-annotations:$swaggerAnnotationsVersion")
@@ -176,6 +181,7 @@ openApiGenerate {
     configOptions.set(
         mapOf(
             "useSpringBoot3" to "true",
+            "interfaceOnly" to "true",
         ),
     )
 
@@ -222,6 +228,8 @@ tasks.matching { it.name == "compileKotlin" || it.name == "kspKotlin" }.configur
     dependsOn("openApiGenerate")
 }
 // compileJava автоматически зависит от generateProto через protobuf-плагин.
+
+apply(from = "gradle/konvert-postprocess.gradle.kts")
 
 // ---------------------------------------------------------------------------
 // ktlint + detekt
