@@ -39,6 +39,9 @@ app:
   kafka:
     basket-events-topic: ${KAFKA_BASKET_EVENTS_TOPIC:basket.events}
     order-events-topic: ${KAFKA_ORDER_EVENTS_TOPIC:order.events}
+  scheduler:
+    assign-order:
+      enabled: ${ASSIGN_ORDER_SCHEDULER_ENABLED:true}
 
 server:
   port: ${HTTP_PORT:8082}

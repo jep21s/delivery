@@ -48,29 +48,45 @@ class AssignmentTest {
     }
 
     @TestFactory
-    fun `getCompletedAssignment succeeds when courier is at assignment location`(): List<DynamicTest> {
-        // Given — координаты, где курьер находится в той же точке, что и задание
+    fun `getCompletedAssignment succeeds when courier is at or adjacent to assignment location`(): List<DynamicTest> {
+        // Given — курьер находится в той же точке (distance=0) или в соседней клетке (distance=1)
         data class Case(
-            val location: Pair<Int, Int>,
+            val assignmentLocation: Pair<Int, Int>,
+            val courierLocation: Pair<Int, Int>,
+            val expectedDistance: Int,
         )
 
         val cases =
             listOf(
-                Case(1 to 1),
-                Case(5 to 5),
-                Case(10 to 10),
-                Case(3 to 7),
-                Case(1 to 10),
+                // distance = 0 — та же точка
+                Case(1 to 1, 1 to 1, 0),
+                Case(5 to 5, 5 to 5, 0),
+                Case(10 to 10, 10 to 10, 0),
+                Case(3 to 7, 3 to 7, 0),
+                Case(1 to 10, 1 to 10, 0),
+                // distance = 1 — одна соседняя клетка по горизонтали/вертикали
+                Case(1 to 1, 2 to 1, 1),
+                Case(5 to 5, 6 to 5, 1),
+                Case(5 to 5, 4 to 5, 1),
+                Case(3 to 7, 3 to 8, 1),
+                Case(3 to 7, 3 to 6, 1),
+                Case(10 to 10, 9 to 10, 1),
             )
 
         return cases.map { case ->
-            DynamicTest.dynamicTest("complete assignment at ${case.location}") {
+            DynamicTest.dynamicTest(
+                "complete assignment at ${case.assignmentLocation}, courier at ${case.courierLocation} " +
+                    "(distance=${case.expectedDistance})",
+            ) {
                 // Given
-                val location = LocationValue.createOrThrow(case.location.first, case.location.second)
-                val assignment = Assignment.create(UUID.randomUUID(), VolumeValue(1), location)
+                val assignmentLocation =
+                    LocationValue.createOrThrow(case.assignmentLocation.first, case.assignmentLocation.second)
+                val courierLocation =
+                    LocationValue.createOrThrow(case.courierLocation.first, case.courierLocation.second)
+                val assignment = Assignment.create(UUID.randomUUID(), VolumeValue(1), assignmentLocation)
 
                 // When
-                val result = assignment.completeAssignment(location)
+                val result = assignment.completeAssignment(courierLocation)
 
                 // Then
                 assertAll(
@@ -87,12 +103,7 @@ class AssignmentTest {
                     {
                         assertThat(assignment.location)
                             .describedAs("location preserved")
-                            .isEqualTo(location)
-                    },
-                    {
-                        assertThat(assignment.orderId)
-                            .describedAs("orderId preserved")
-                            .isEqualTo(assignment.orderId)
+                            .isEqualTo(assignmentLocation)
                     },
                 )
             }
@@ -100,24 +111,29 @@ class AssignmentTest {
     }
 
     @TestFactory
-    fun `getCompletedAssignment fails when courier is not at assignment location`(): List<DynamicTest> {
-        // Given — курьер находится в другой точке, чем задание
+    fun `getCompletedAssignment fails when courier is farther than proximity threshold`(): List<DynamicTest> {
+        // Given — курьер находится на расстоянии > 1 от точки назначения
         data class Case(
             val assignmentLocation: Pair<Int, Int>,
             val courierLocation: Pair<Int, Int>,
+            val expectedDistance: Int,
         )
 
         val cases =
             listOf(
-                Case(1 to 1, 2 to 1),
-                Case(5 to 5, 6 to 5),
-                Case(3 to 7, 3 to 8),
-                Case(1 to 1, 10 to 10),
-                Case(10 to 1, 1 to 10),
+                Case(1 to 1, 1 to 3, 2),
+                Case(5 to 5, 7 to 5, 2),
+                Case(3 to 7, 3 to 9, 2),
+                Case(5 to 5, 6 to 6, 2),
+                Case(1 to 1, 10 to 10, 18),
+                Case(10 to 1, 1 to 10, 18),
             )
 
         return cases.map { case ->
-            DynamicTest.dynamicTest("assignment at ${case.assignmentLocation}, courier at ${case.courierLocation} is rejected") {
+            DynamicTest.dynamicTest(
+                "assignment at ${case.assignmentLocation}, courier at ${case.courierLocation} " +
+                    "(distance=${case.expectedDistance}) is rejected",
+            ) {
                 // Given
                 val assignmentLocation =
                     LocationValue.createOrThrow(case.assignmentLocation.first, case.assignmentLocation.second)

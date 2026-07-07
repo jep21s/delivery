@@ -17,6 +17,9 @@ ij_kotlin_allow_trailing_comma_on_call_site = true
 # ktlint specifics
 ktlint_standard_no-wildcard-imports = disabled
 ktlint_standard_function-naming = disabled
+# Пакет `adapters.in.http` требует backticks (in — ключевое слово Kotlin);
+# стандартное правило не допускает backticks в имени пакета — отключаем.
+ktlint_standard_package-name = disabled
 
 [*.{yml,yaml}]
 indent_size = 2

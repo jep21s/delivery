@@ -1,0 +1,4 @@
+app:
+  scheduler:
+    assign-order:
+      enabled: false

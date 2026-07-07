@@ -3,7 +3,7 @@ package microarch.delivery.adapters.out.postgres.order
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import java.util.UUID
-import microarch.delivery.PostgresContextInitializer
+import microarch.delivery.BaseIntegrationTest
 import microarch.delivery.core.domain.model.LocationValue
 import microarch.delivery.core.domain.model.VolumeValue
 import microarch.delivery.core.domain.model.order.Order
@@ -13,14 +13,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.transaction.annotation.Transactional
 
-@SpringBootTest
-@ContextConfiguration(initializers = [PostgresContextInitializer::class])
 @Transactional
-class OrderRepositoryIntegrationTest {
+class OrderRepositoryIntegrationTest : BaseIntegrationTest() {
     @Autowired
     private lateinit var orderRepository: OrderRepository
 

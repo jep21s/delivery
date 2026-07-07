@@ -34,6 +34,7 @@ class CreateCourierCommandHandlerImplTest {
         val saved = added.captured
         assertAll(
             { assertThat(result.isRight()).describedAs("handle is right").isTrue() },
+            { assertThat(result.getOrNull()).describedAs("returned id").isEqualTo(saved.id) },
             { assertThat(saved.name).describedAs("name").isEqualTo("Алиса") },
             { assertThat(saved.maxVolume).describedAs("maxVolume").isEqualTo(VolumeValue(20)) },
             { assertThat(saved.assignments).describedAs("no assignments").isEmpty() },
