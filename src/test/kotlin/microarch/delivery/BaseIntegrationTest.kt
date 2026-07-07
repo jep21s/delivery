@@ -12,6 +12,7 @@ import org.springframework.test.context.jdbc.SqlConfig
     initializers = [
         PostgresContextInitializer::class,
         KafkaContextInitializer::class,
+        GeoGrpcContextInitializer::class,
     ],
 )
 @Sql(
