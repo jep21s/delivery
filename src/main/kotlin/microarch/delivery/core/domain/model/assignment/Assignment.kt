@@ -46,14 +46,17 @@ class Assignment private constructor(
     var status: Status,
 ) : BaseEntity<UUID>(id) {
     fun completeAssignment(courierLocation: LocationValue): Either<LogicError, Unit> {
-        if (this.location != courierLocation) {
+        val distance = this.location.distanceTo(courierLocation)
+        if (distance > COMPLETE_PROXIMITY) {
             return LogicError
                 .of(
                     code = "400",
                     message =
                         "The courier is not close enough. " +
                             "Courier location: $courierLocation, " +
-                            "Assignment location: ${this.location}",
+                            "Assignment location: ${this.location}, " +
+                            "distance: $distance, " +
+                            "max allowed distance: $COMPLETE_PROXIMITY",
                 ).left()
         }
         if (this.status != Status.ASSIGNED) {
@@ -72,6 +75,8 @@ class Assignment private constructor(
     }
 
     companion object {
+        private const val COMPLETE_PROXIMITY = 1
+
         fun create(
             orderId: UUID,
             volume: VolumeValue,
