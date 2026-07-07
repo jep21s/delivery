@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 interface OrderJpaRepository : JpaRepository<Order, UUID> {
     fun findFirstByStatus(status: OrderStatus): Order?
 
-    fun findAllByStatus(status: OrderStatus): List<Order>
+    fun findAllByStatusIn(statuses: Set<OrderStatus>): List<Order>
 }

@@ -18,5 +18,5 @@ class OrderRepositoryImpl(
 
     override fun getFirstCreated(): Order? = orderJpaRepository.findFirstByStatus(OrderStatus.CREATED)
 
-    override fun getAllAssigned(): List<Order> = orderJpaRepository.findAllByStatus(OrderStatus.ASSIGNED)
+    override fun getAllByStatusIn(statuses: Set<OrderStatus>): List<Order> = orderJpaRepository.findAllByStatusIn(statuses)
 }

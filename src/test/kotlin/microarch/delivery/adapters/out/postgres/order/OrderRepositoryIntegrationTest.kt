@@ -102,24 +102,29 @@ class OrderRepositoryIntegrationTest {
     }
 
     @Test
-    fun `getAllAssigned returns only assigned orders`() {
+    fun `getAllByStatusIn returns only orders with matching statuses`() {
         // Given — 2 назначенных, 1 новый, 1 выполненный
         val assigned1 = orderRepository.add(orderInStatus(OrderStatus.ASSIGNED))
         val assigned2 = orderRepository.add(orderInStatus(OrderStatus.ASSIGNED))
-        orderRepository.add(orderInStatus(OrderStatus.CREATED))
+        val created = orderRepository.add(orderInStatus(OrderStatus.CREATED))
         orderRepository.add(orderInStatus(OrderStatus.COMPLETED))
         flushAndClear()
 
         // When
-        val result = orderRepository.getAllAssigned()
+        val result = orderRepository.getAllByStatusIn(setOf(OrderStatus.CREATED, OrderStatus.ASSIGNED))
 
         // Then
         val ids = result.map { it.id }
         assertAll(
-            { assertThat(result).describedAs("two assigned").hasSize(2) },
+            { assertThat(result).describedAs("three not-completed").hasSize(3) },
             { assertThat(ids).describedAs("contains assigned1").contains(assigned1.id) },
             { assertThat(ids).describedAs("contains assigned2").contains(assigned2.id) },
-            { assertThat(result.map { it.status }).describedAs("all ASSIGNED").containsOnly(OrderStatus.ASSIGNED) },
+            { assertThat(ids).describedAs("contains created").contains(created.id) },
+            {
+                assertThat(result.map { it.status })
+                    .describedAs("only CREATED or ASSIGNED")
+                    .containsOnly(OrderStatus.CREATED, OrderStatus.ASSIGNED)
+            },
         )
     }
 
@@ -137,7 +142,7 @@ class OrderRepositoryIntegrationTest {
      * доменные переходы из начального статуса CREATED.
      */
     private fun orderInStatus(status: OrderStatus): Order {
-        var current = Order.create(UUID.randomUUID(), LocationValue.createOrThrow(1, 1), VolumeValue(1))
+        val current = Order.create(UUID.randomUUID(), LocationValue.createOrThrow(1, 1), VolumeValue(1))
         if (status == OrderStatus.CREATED) return current
         current.assignOrder().getOrNull()!!
         if (status == OrderStatus.ASSIGNED) return current
