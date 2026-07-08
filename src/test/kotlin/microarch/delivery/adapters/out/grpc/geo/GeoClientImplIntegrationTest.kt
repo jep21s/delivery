@@ -21,13 +21,7 @@ class GeoClientImplIntegrationTest {
         val fake = FakeGeoService().apply { location = location(5, 8) }
         withClient(fake) { client ->
             val result =
-                client.getLocation(
-                    country = "Россия",
-                    city = "Москва",
-                    street = "Тверская",
-                    house = "1",
-                    apartment = "2",
-                )
+                client.getLocation(street = "Тверская")
 
             assertThat(result).isEqualTo(LocationValue.createOrThrow(5, 8).right())
         }
@@ -38,13 +32,7 @@ class GeoClientImplIntegrationTest {
         val fake = FakeGeoService().apply { error = Status.UNAVAILABLE.withDescription("down") }
         withClient(fake) { client ->
             val result =
-                client.getLocation(
-                    country = "Россия",
-                    city = "Москва",
-                    street = "Тверская",
-                    house = "1",
-                    apartment = "2",
-                )
+                client.getLocation(street = "Тверская")
 
             assertThat(result.isLeft()).describedAs("isLeft").isTrue()
             val error = result.fold({ e: LogicError -> e }, { error("expected Left") })
@@ -57,13 +45,7 @@ class GeoClientImplIntegrationTest {
         val fake = FakeGeoService().apply { location = location(99, 5) }
         withClient(fake) { client ->
             val result =
-                client.getLocation(
-                    country = "Россия",
-                    city = "Москва",
-                    street = "Тверская",
-                    house = "1",
-                    apartment = "2",
-                )
+                client.getLocation(street = "Тверская")
 
             assertThat(result.isLeft())
                 .describedAs("isLeft (domain validation rejects x=99)")

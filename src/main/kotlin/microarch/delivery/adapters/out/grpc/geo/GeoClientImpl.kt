@@ -32,21 +32,11 @@ class GeoClientImpl(
         }
     }
 
-    override fun getLocation(
-        country: String,
-        city: String,
-        street: String,
-        house: String,
-        apartment: String,
-    ): Either<LogicError, LocationValue> {
+    override fun getLocation(street: String): Either<LogicError, LocationValue> {
         val request =
             GeoProto.GetGeolocationRequest
                 .newBuilder()
-                .setCountry(country)
-                .setCity(city)
                 .setStreet(street)
-                .setHouse(house)
-                .setApartment(apartment)
                 .build()
         return try {
             val response = stub.getGeolocation(request)

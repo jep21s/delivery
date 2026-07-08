@@ -32,12 +32,5 @@ class CreateOrderCommandHandlerImpl(
             domainEventPublisher.publish(listOf(saved))
         }
 
-    private fun getLocation(command: CreateOrderCommand): Either<LogicError, LocationValue> =
-        geoClient.getLocation(
-            country = command.country,
-            city = command.city,
-            street = command.street,
-            house = command.house,
-            apartment = command.apartment,
-        )
+    private fun getLocation(command: CreateOrderCommand): Either<LogicError, LocationValue> = geoClient.getLocation(street = command.street)
 }

@@ -26,15 +26,7 @@ class CreateOrderCommandHandlerImplTest {
         val publisher = mockk<DomainEventPublisher>()
         val geoClient = mockk<GeoClient>()
         val fixedLocation = LocationValue.createOrThrow(7, 3)
-        every {
-            geoClient.getLocation(
-                country = any(),
-                city = any(),
-                street = any(),
-                house = any(),
-                apartment = any(),
-            )
-        } returns fixedLocation.right()
+        every { geoClient.getLocation(street = any()) } returns fixedLocation.right()
         val handler = CreateOrderCommandHandlerImpl(orderRepository, geoClient, publisher)
 
         val added = slot<microarch.delivery.core.domain.model.order.Order>()
@@ -66,7 +58,7 @@ class CreateOrderCommandHandlerImplTest {
             { assertThat(saved.volume).describedAs("volume").isEqualTo(VolumeValue(5)) },
             { assertThat(saved.location).describedAs("location from Geo").isEqualTo(fixedLocation) },
         )
-        verify(exactly = 1) { geoClient.getLocation(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) { geoClient.getLocation(any()) }
         verify(exactly = 1) { orderRepository.add(any()) }
         verify { publisher.publish(any()) }
     }
