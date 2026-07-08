@@ -98,6 +98,7 @@ dependencies {
     testImplementation("org.reflections:reflections:0.10.2")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.ninja-squad:springmockk:$springmockkVersion")
+    testImplementation("org.awaitility:awaitility")
 }
 
 // ---------------------------------------------------------------------------
