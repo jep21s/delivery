@@ -3,18 +3,15 @@ package libs.ddd
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.time.Instant
 import java.util.UUID
-import org.springframework.context.ApplicationEvent
 
-abstract class DomainEvent : ApplicationEvent {
+abstract class DomainEvent {
+    @JsonIgnore
     val eventId: UUID = UUID.randomUUID()
 
+    @JsonIgnore
     val occurredOnUtc: Instant = Instant.now()
 
-    constructor(source: Any?) : super(source)
+    protected constructor()
 
-    // Fake Ctr for Jackson / JPA
-    protected constructor() : super("default")
-
-    @JsonIgnore
-    override fun getSource(): Any? = super.getSource()
+    constructor(source: Any?)
 }

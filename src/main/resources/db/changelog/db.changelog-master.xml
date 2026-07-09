@@ -10,5 +10,6 @@
     <include file="db/changelog/changes/001-create-orders.xml"/>
     <include file="db/changelog/changes/002-create-assignments.xml"/>
     <include file="db/changelog/changes/003-create-couriers.xml"/>
+    <include file="db/changelog/changes/004-create-outbox.xml"/>
 
 </databaseChangeLog>
