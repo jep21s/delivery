@@ -1,5 +1,6 @@
 package microarch.delivery.adapters.out.kafka
 
+import java.nio.charset.StandardCharsets
 import java.time.Duration
 import java.util.Collections
 import java.util.Properties
@@ -60,7 +61,8 @@ class OrderEventsProducerIntegrationTest : BaseIntegrationTest() {
         assignOrderCommandHandler.handle(AssignOrderCommand.create().getOrNull()!!)
 
         // Then — в order.events появляется OrderAssignedIntegrationEvent с order_id
-        val records = pollForRecords(consumer, order.id)
+        val records =
+            pollForRecords(consumer, order.id, EventType.ORDER_ASSIGNED)
         val events = records.map { OrderAssignedIntegrationEvent.parseFrom(it.value()) }
         assertAll(
             { assertThat(events).describedAs("at least one event").isNotEmpty },
@@ -68,6 +70,11 @@ class OrderEventsProducerIntegrationTest : BaseIntegrationTest() {
                 assertThat(events.map { it.orderId })
                     .describedAs("contains order_id")
                     .contains(order.id.toString())
+            },
+            {
+                assertThat(records.map { headerValue(it, KafkaDomainEventProducer.EVENT_TYPE_HEADER) })
+                    .describedAs("all records have event_type header")
+                    .containsOnly(EventType.ORDER_ASSIGNED.name)
             },
         )
     }
@@ -87,7 +94,8 @@ class OrderEventsProducerIntegrationTest : BaseIntegrationTest() {
         )
 
         // Then — в order.events появляется OrderCompletedIntegrationEvent с order_id
-        val records = pollForRecords(consumer, order.id)
+        val records =
+            pollForRecords(consumer, order.id, EventType.ORDER_COMPLETED)
         val events = records.map { OrderCompletedIntegrationEvent.parseFrom(it.value()) }
         assertAll(
             { assertThat(events).describedAs("at least one event").isNotEmpty },
@@ -95,6 +103,11 @@ class OrderEventsProducerIntegrationTest : BaseIntegrationTest() {
                 assertThat(events.map { it.orderId })
                     .describedAs("contains order_id")
                     .contains(order.id.toString())
+            },
+            {
+                assertThat(records.map { headerValue(it, KafkaDomainEventProducer.EVENT_TYPE_HEADER) })
+                    .describedAs("all records have event_type header")
+                    .containsOnly(EventType.ORDER_COMPLETED.name)
             },
         )
     }
@@ -114,6 +127,7 @@ class OrderEventsProducerIntegrationTest : BaseIntegrationTest() {
     private fun pollForRecords(
         consumer: KafkaConsumer<String, ByteArray>,
         expectedKey: UUID,
+        expectedEventType: EventType,
     ): List<ConsumerRecord<String, ByteArray>> {
         val collected = mutableListOf<ConsumerRecord<String, ByteArray>>()
         await()
@@ -122,10 +136,23 @@ class OrderEventsProducerIntegrationTest : BaseIntegrationTest() {
             .pollInterval(1, SECONDS)
             .untilAsserted {
                 consumer.poll(Duration.ofSeconds(1)).forEach { record ->
-                    if (record.key() == expectedKey.toString()) collected.add(record)
+                    val eventType = headerValue(record, KafkaDomainEventProducer.EVENT_TYPE_HEADER)
+                    if (record.key() == expectedKey.toString() && eventType == expectedEventType.name) {
+                        collected.add(record)
+                    }
                 }
                 assertThat(collected).isNotEmpty
             }
         return collected
     }
+
+    private fun headerValue(
+        record: ConsumerRecord<String, ByteArray>,
+        headerName: String,
+    ): String? =
+        record
+            .headers()
+            .lastHeader(headerName)
+            ?.value()
+            ?.toString(StandardCharsets.UTF_8)
 }

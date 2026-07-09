@@ -1,10 +1,13 @@
 package microarch.delivery.adapters.out.kafka
 
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.ExecutionException
 import libs.ddd.DomainEvent
 import microarch.delivery.core.domain.model.order.events.OrderAssignedDomainEvent
 import microarch.delivery.core.domain.model.order.events.OrderCompletedDomainEvent
 import microarch.delivery.core.ports.DomainEventProducer
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.header.internals.RecordHeader
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Component
@@ -27,7 +30,7 @@ class KafkaDomainEventProducer(
                             .newBuilder()
                             .setOrderId(event.orderId.toString())
                             .build()
-                    kafkaTemplate.send(topic, event.orderId.toString(), proto.toByteArray()).get()
+                    send(event.orderId.toString(), proto.toByteArray(), EventType.ORDER_ASSIGNED)
                 }
 
                 is OrderCompletedDomainEvent -> {
@@ -36,7 +39,7 @@ class KafkaDomainEventProducer(
                             .newBuilder()
                             .setOrderId(event.orderId.toString())
                             .build()
-                    kafkaTemplate.send(topic, event.orderId.toString(), proto.toByteArray()).get()
+                    send(event.orderId.toString(), proto.toByteArray(), EventType.ORDER_COMPLETED)
                 }
 
                 else -> {
@@ -49,5 +52,25 @@ class KafkaDomainEventProducer(
         } catch (e: ExecutionException) {
             throw RuntimeException("Kafka publish failed", e)
         }
+    }
+
+    private fun send(
+        key: String,
+        payload: ByteArray,
+        eventType: EventType,
+    ) {
+        val record =
+            ProducerRecord<String, ByteArray>(
+                topic,
+                null,
+                key,
+                payload,
+                listOf(RecordHeader(EVENT_TYPE_HEADER, eventType.name.toByteArray(StandardCharsets.UTF_8))),
+            )
+        kafkaTemplate.send(record).get()
+    }
+
+    companion object {
+        const val EVENT_TYPE_HEADER = "event_type"
     }
 }
