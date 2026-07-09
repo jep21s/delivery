@@ -16,6 +16,8 @@ import libs.ddd.Aggregate
 import libs.errs.LogicError
 import microarch.delivery.core.domain.model.LocationValue
 import microarch.delivery.core.domain.model.VolumeValue
+import microarch.delivery.core.domain.model.order.events.OrderAssignedDomainEvent
+import microarch.delivery.core.domain.model.order.events.OrderCompletedDomainEvent
 
 @Entity
 @Table(name = "orders")
@@ -53,6 +55,7 @@ class Order private constructor(
                 ).left()
         }
         status = OrderStatus.ASSIGNED
+        raiseDomainEvent(OrderAssignedDomainEvent(this))
 
         return Unit.right()
     }
@@ -67,6 +70,7 @@ class Order private constructor(
                 ).left()
         }
         this.status = OrderStatus.COMPLETED
+        raiseDomainEvent(OrderCompletedDomainEvent(this))
 
         return Unit.right()
     }

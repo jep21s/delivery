@@ -14,6 +14,7 @@ class DefaultDomainEventPublisher(
             for (event in aggregate.getDomainEvents()) {
                 publisher.publishEvent(event)
             }
+            aggregate.clearDomainEvents()
         }
     }
 }

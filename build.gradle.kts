@@ -119,6 +119,7 @@ allOpen {
     annotation("jakarta.persistence.MappedSuperclass")
     annotation("jakarta.persistence.Entity")
     annotation("org.springframework.context.event.EventListener")
+    annotation("org.springframework.transaction.event.TransactionalEventListener")
 }
 
 tasks.withType<Test> {
