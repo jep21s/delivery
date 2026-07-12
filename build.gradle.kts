@@ -115,11 +115,10 @@ kotlin {
 
 allOpen {
     // Гарантируем, что JPA @MappedSuperclass-классы (BaseEntity, Aggregate)
-    // и DomainEvent (extends ApplicationEvent) открыты для наследования и JPA.
+    // открыты для наследования и JPA.
     annotation("jakarta.persistence.MappedSuperclass")
     annotation("jakarta.persistence.Entity")
     annotation("org.springframework.context.event.EventListener")
-    annotation("org.springframework.transaction.event.TransactionalEventListener")
 }
 
 tasks.withType<Test> {

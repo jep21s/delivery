@@ -16,7 +16,7 @@ import org.springframework.test.context.jdbc.SqlConfig
     ],
 )
 @Sql(
-    statements = ["TRUNCATE TABLE assignments, couriers, orders RESTART IDENTITY CASCADE"],
+    statements = ["TRUNCATE TABLE assignments, couriers, orders, outbox RESTART IDENTITY CASCADE"],
     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD,
     config = SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED),
 )
